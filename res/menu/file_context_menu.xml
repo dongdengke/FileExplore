@@ -1,0 +1,23 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="cn.edu.bjtu.fileexploree.MainActivity" >
+
+    <item
+        android:id="@+id/copy"
+        android:title="复制"
+   />
+        <item
+        android:id="@+id/paste"
+        android:title="粘贴"
+   />
+            <item
+        android:id="@+id/rename"
+        android:title="重命名"
+   />
+                        <item
+        android:id="@+id/selectAll"
+        android:title="全选"
+   />
+
+</menu>

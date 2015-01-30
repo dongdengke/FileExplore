@@ -3,6 +3,7 @@ package cn.edu.bjtu.fileexplorer.adapter;
 import java.io.File;
 
 import android.content.Context;
+import android.os.Handler;
 import android.os.Parcelable;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,18 +14,22 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import cn.edu.bjtu.fileexploree.R;
+import cn.edu.bjtu.fileexplorer.utils.ApkUtils;
+import cn.edu.bjtu.fileexplorer.utils.AsycLoadImage;
 
 public class FileAdapter extends BaseAdapter implements OnScrollListener {
 	private Context context;
 	private File[] listFiles;
 	private ListView listView;
-	public Parcelable state;
+	public static Parcelable state;
+	public AsycLoadImage asycLoadImage;
 
 	public FileAdapter(Context context, File[] listFiles, ListView listView) {
 		this.context = context;
 		this.listFiles = listFiles;
 		this.listView = listView;
 		listView.setOnScrollListener(this);
+		asycLoadImage = new AsycLoadImage(context, new Handler());
 	}
 
 	/**
@@ -118,11 +123,29 @@ public class FileAdapter extends BaseAdapter implements OnScrollListener {
 				holder.iv_icon.setImageResource(R.drawable.format_music);
 				holder.tv_name.setText(fileName);
 
+			} else if (fileName.endsWith(".apk")) {
+				holder.iv_icon.setImageDrawable(ApkUtils.loadApkIcon(context,
+						listFiles[position].getAbsolutePath()));
+				holder.tv_name.setText(fileName);
 			} else if (fileName.endsWith(".jpg")
 
 			|| fileName.endsWith(".jpeg") || fileName.endsWith(".png")) {
 				// asyncLoadImage.loadImage3(holder.fileIcon);
-				holder.iv_icon.setImageResource(R.drawable.format_picture);
+				// 根据图片设置图标
+				// 1 直接设置图片，图片过多时可能造成内存溢出
+				// Bitmap bitmap = BitmapFactory.decodeFile(listFiles[position]
+				// .getAbsolutePath());
+				// 2 把图片放缩,但是还可能造成内存溢出
+				// BitmapFactory.Options options = new BitmapFactory.Options();
+				// options.inSampleSize = 2;
+				// Bitmap bitmap = BitmapFactory.decodeFile(
+				// listFiles[position].getAbsolutePath(), options);
+				// holder.iv_icon.setImageBitmap(bitmap);
+				// 3 异步加载
+				holder.iv_icon.setTag(listFiles[position].getAbsolutePath());
+				// asycLoadImage.loadImage(holder.iv_icon);
+				// asycLoadImage.loadImage2(holder.iv_icon);
+				asycLoadImage.loadImage3(holder.iv_icon);
 				holder.tv_name.setText(fileName);
 
 			} else {
@@ -145,17 +168,17 @@ public class FileAdapter extends BaseAdapter implements OnScrollListener {
 		switch (scrollState) {
 		case OnScrollListener.SCROLL_STATE_FLING:// 这个滑动中
 			// 锁住 isAllow = false
-			// asyncLoadImage.lock();
+			asycLoadImage.lock();
 			break;
 		case OnScrollListener.SCROLL_STATE_IDLE:// 滑动停止
 			// isAllow = true;
 			state = listView.onSaveInstanceState();
-			// asyncLoadImage.unLock();
+			asycLoadImage.unLock();
 			// Log.d(TAG, "state:" + state);
 			break;
 		case OnScrollListener.SCROLL_STATE_TOUCH_SCROLL:// 手指还在屏幕上
 			// isAllow = false
-			// asyncLoadImage.lock();
+			asycLoadImage.lock();
 			break;
 		default:
 			break;
